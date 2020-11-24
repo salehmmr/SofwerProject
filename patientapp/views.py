@@ -20,7 +20,7 @@ def new_report(data):
             p.symptoms.add(a)
             sum = sum + int(a.weight)
         avg = sum / len(symptoms)
-        if avg > 5:
+        if avg > 4:
             rsp = {'illness': "Ghatei"}
         elif avg > 3:
             rsp = {'illness': "Mashkook"}
@@ -65,6 +65,9 @@ def createPatient(request):
                 'symptoms': e
             }
             rsp = new_report(data)
+            if rsp.get('illness') == 'Unkown':
+                context = {'form': form}
+                return render(request, 'ErrorpatientForm.html', context)
             context = rsp
             return render(request, 'rsp.html', context)
 
