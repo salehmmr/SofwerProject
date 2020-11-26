@@ -9,6 +9,8 @@ class Symptom(models.Model):
         ('بدن درد', 'بدن درد'),
         ('تنگی نفس', 'تنگی نفس'),
         ('خستگی', 'خستگی'),
+        ('آبریزش بینی', 'آبریزش بینی'),
+
     )
     title = models.CharField(max_length=100, null=True, choices=SYMPTOMS)
     weight = models.CharField(max_length=10, null=True)
@@ -27,7 +29,7 @@ class Status(models.Model):
     Statustitle = models.CharField(max_length=100, null=True, choices=STATUS)
 
     def __str__(self):
-        return self.title
+        return self.Statustitle
 
 
 class DiseaseStatus(models.Model):
@@ -40,7 +42,7 @@ class DiseaseStatus(models.Model):
     probableWeight = models.CharField(max_length=10, null=True)
 
     def __str__(self):
-        return self.title + "" + self.probableWeight
+        return self.DiseaseStatustitle + "" + self.probableWeight
 
 
 class Patient(models.Model):

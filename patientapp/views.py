@@ -18,8 +18,11 @@ def new_report(data):
             a = models.Symptom.objects.get(id=i)
             p.symptoms.add(a)
             sum = sum + int(a.weight)
-        if sum > 12:
-            a = models.DiseaseStatus.objects.get(DiseaseStatustitle="Ghatei")
+
+        a = models.DiseaseStatus.objects.get(DiseaseStatustitle="Ghatei")
+        b = models.DiseaseStatus.objects.get(DiseaseStatustitle="Mashkook")
+        c = models.DiseaseStatus.objects.get(DiseaseStatustitle="Anfoolanza")
+        if sum > int(a.probableWeight):
             p.diseases.add(a)
             rsp = {'illness': "قطعی کرونا",
                    'patientid': p.id,
@@ -28,9 +31,8 @@ def new_report(data):
                    'patientPhone': p.phoneNumber,
                    'patientCode': p.nationalCode
                    }
-        elif sum > 8:
-            a = models.DiseaseStatus.objects.get(DiseaseStatustitle="Mashkook")
-            p.diseases.add(a)
+        elif sum > int(b.probableWeight):
+            p.diseases.add(b)
             rsp = {'illness': "مشکوک به کرونا",
                    'patientid': p.id,
                    'patientFname': p.firstName,
@@ -39,8 +41,7 @@ def new_report(data):
                    'patientCode': p.nationalCode
                    }
         else:
-            a = models.DiseaseStatus.objects.get(DiseaseStatustitle="Anfoolanza")
-            p.diseases.add(a)
+            p.diseases.add(c)
             rsp = {'illness': "آنفولانزا",
                    'patientid': p.id,
                    'patientFname': p.firstName,
@@ -142,18 +143,3 @@ def getResponse(request):
     return render(request, 'rsp.html', context)
 
     # return render(request, 'rsp.html', )
-
-# redirect(reverse('app:view', kwargs={'bar': FooBar}))
-
-
-# def createPatient(request):
-#     form = PatientForm()
-#     if request.method == 'POST':
-#         form = PatientForm(request.POST)
-#         print(form.data)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('home/')
-#
-#     context = {'form': form}
-#     return render(request, 'patientForm.html', context)
