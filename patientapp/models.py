@@ -1,8 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
-
 class Symptom(models.Model):
     SYMPTOMS = (
         ('تب', 'تب'),
@@ -21,12 +19,12 @@ class Symptom(models.Model):
 
 class Status(models.Model):
     STATUS = (
-        ('قرنطینه خانگی', 'قرنطینه خانگی'),
-        ('بستری در بیمارستان', 'بستری در بیمارستان'),
-        ('عادی', 'عادی'),
-        ('فوت شده', 'فوت شده'),
+        ('Qarantine', 'قرنطینه خانگی'),
+        ('Bastari', 'بستری در بیمارستان'),
+        ('Normal', 'عادی'),
+        ('Dead', 'فوت شده'),
     )
-    title = models.CharField(max_length=100, null=True, choices=STATUS)
+    Statustitle = models.CharField(max_length=100, null=True, choices=STATUS)
 
     def __str__(self):
         return self.title
@@ -34,11 +32,11 @@ class Status(models.Model):
 
 class DiseaseStatus(models.Model):
     CONDITION = (
-        ('آنفولانزا', 'آنفولانزا'),
-        ('مشکوک به کرونا', 'مشکوک به کرونا'),
-        ('قطعی کرونا', 'قطعی کرونا'),
+        ('Anfoolanza', 'آنفولانزا'),
+        ('Mashkook', 'مشکوک به کرونا'),
+        ('Ghatei', 'قطعی کرونا'),
     )
-    title = models.CharField(max_length=100, null=True, choices=CONDITION)
+    DiseaseStatustitle = models.CharField(max_length=100, null=True, choices=CONDITION)
     probableWeight = models.CharField(max_length=10, null=True)
 
     def __str__(self):
