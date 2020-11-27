@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Symptom(models.Model):
@@ -10,7 +11,6 @@ class Symptom(models.Model):
         ('تنگی نفس', 'تنگی نفس'),
         ('خستگی', 'خستگی'),
         ('آبریزش بینی', 'آبریزش بینی'),
-
     )
     title = models.CharField(max_length=100, null=True, choices=SYMPTOMS)
     weight = models.CharField(max_length=10, null=True)
@@ -39,10 +39,11 @@ class DiseaseStatus(models.Model):
         ('Ghatei', 'قطعی کرونا'),
     )
     DiseaseStatustitle = models.CharField(max_length=100, null=True, choices=CONDITION)
+    is_System = models.BooleanField(default=False)
     probableWeight = models.CharField(max_length=10, null=True)
 
     def __str__(self):
-        return self.DiseaseStatustitle + "" + self.probableWeight
+        return self.DiseaseStatustitle + " " + str(self.is_System)
 
 
 class Patient(models.Model):
@@ -56,6 +57,12 @@ class Patient(models.Model):
 
     def __str__(self):
         return self.firstName + " " + self.lastName
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular book instance.
+        """
+        return reverse('editReport', args=[str(self.id)])
 
 
 class Connections(models.Model):
