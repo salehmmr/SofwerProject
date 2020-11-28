@@ -5,16 +5,22 @@ from . import models
 class PatientForm(ModelForm):
     class Meta:
         model = models.Patient
-        fields = ['firstName', 'lastName', 'nationalCode', 'phoneNumber', 'symptoms']
+        fields = ['first_name', 'last_name', 'phone_number', 'national_code', 'birth_date']
+
+
+class SymptomForm(ModelForm):
+    class Meta:
+        model = models.Symptom
+        fields = ['symptom_title']
 
 
 class DiseaseStatusForm(ModelForm):
     class Meta:
         model = models.DiseaseStatus
-        fields = ['DiseaseStatustitle']
+        fields = ['disease_status_title']
 
 
-class StatusForm(ModelForm):
+class PatientStatusForm(ModelForm):
     class Meta:
-        model = models.Status
-        fields = ['Statustitle']
+        model = models.PatientStatus
+        fields = ['patient_status_title']

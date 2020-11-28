@@ -9,69 +9,82 @@ def new_report(data):
     last_name = data["lastName"]
     phone_number = data["phoneNumber"]
     national_code = data["nationalCode"]
+    birth_date = data['birthData']
     symptoms = data['symptoms']
-    is_Available = models.Patient.objects.filter(nationalCode=national_code)
+    is_Available = models.Patient.objects.filter(national_code=national_code)
     if not is_Available:
-        p = models.Patient.objects.create(firstName=first_name, lastName=last_name, phoneNumber=phone_number,
-                                          nationalCode=national_code)
+        current_patient = models.Patient.objects.create(first_name=first_name,
+                                                        last_name=last_name, phone_number=phone_number,
+                                                        national_code=national_code, birth_date=birth_date)
         sum = 0
         for i in symptoms:
-            a = models.Symptom.objects.get(id=i)
-            p.symptoms.add(a)
-            sum = sum + int(a.weight)
-
-        a = models.DiseaseStatus.objects.get(DiseaseStatustitle="Ghatei", is_System=True)
-        b = models.DiseaseStatus.objects.get(DiseaseStatustitle="Mashkook", is_System=True)
-        c = models.DiseaseStatus.objects.get(DiseaseStatustitle="Anfoolanza", is_System=True)
-        if sum > int(a.probableWeight):
-            p.diseases.add(a)
-            rsp = {'illness': "قطعی کرونا",
-                   'patientid': p.id,
-                   'patientFname': p.firstName,
-                   'patientLname': p.lastName,
-                   'patientPhone': p.phoneNumber,
-                   'patientCode': p.nationalCode
+            if models.Symptom.objects.filter(symptom_title=i):
+                current_symptom = models.Symptom.objects.get(symptom_title=i)
+                models.PatientSymptom.objects.create(patient=current_patient, symptom=current_symptom)
+                sum = sum + current_symptom.weight
+        ghatei = models.DiseaseStatus.objects.get(disease_status_title="قطعی کرونا", is_System=True)
+        mashkook = models.DiseaseStatus.objects.get(disease_status_title="مشکوک به کرونا", is_System=True)
+        anfoolanza = models.DiseaseStatus.objects.get(disease_status_title="آنفولانزا", is_System=True)
+        if sum > ghatei.probable:
+            models.Status.objects.create(patient=current_patient, disease_status=ghatei)
+            rsp = {'illness': ghatei.disease_status_title,
+                   'patientFname': current_patient.first_name,
+                   'patientLname': current_patient.last_name,
+                   'patientPhone': current_patient.phone_number,
+                   'patientCode': current_patient.national_code,
+                   'patientBirthDate': current_patient.birth_date,
+                   'patientid': current_patient.id,
+                   'flag': True
                    }
-        elif sum > int(b.probableWeight):
-            p.diseases.add(b)
-            rsp = {'illness': "مشکوک به کرونا",
-                   'patientid': p.id,
-                   'patientFname': p.firstName,
-                   'patientLname': p.lastName,
-                   'patientPhone': p.phoneNumber,
-                   'patientCode': p.nationalCode
+        elif sum > mashkook.probable:
+            models.Status.objects.create(patient=current_patient, disease_status=mashkook)
+            rsp = {'illness': mashkook.disease_status_title,
+                   'patientFname': current_patient.first_name,
+                   'patientLname': current_patient.last_name,
+                   'patientPhone': current_patient.phone_number,
+                   'patientCode': current_patient.national_code,
+                   'patientBirthDate': current_patient.birth_date,
+                   'patientid': current_patient.id,
+                   'flag': True
                    }
         else:
-            p.diseases.add(c)
-            rsp = {'illness': "آنفولانزا",
-                   'patientid': p.id,
-                   'patientFname': p.firstName,
-                   'patientLname': p.lastName,
-                   'patientPhone': p.phoneNumber,
-                   'patientCode': p.nationalCode
+            models.Status.objects.create(patient=current_patient, disease_status=anfoolanza)
+            rsp = {'illness': anfoolanza.disease_status_title,
+                   'patientFname': current_patient.first_name,
+                   'patientLname': current_patient.last_name,
+                   'patientPhone': current_patient.phone_number,
+                   'patientCode': current_patient.national_code,
+                   'patientBirthDate': current_patient.birth_date,
+                   'patientid': current_patient.id,
+                   'flag': True
                    }
+
         return rsp
 
     else:
-        return {'illness': "Unkown",
-                'patientid': "",
-                'patientFname': "",
-                'patientLname': "",
-                'patientPhone': "",
-                'patientCode': ""
-                }
+        # Current_patient = models.Patient.objects.get(nationalCode=national_code)
+        # Current_patient.firstName = first_name
+        # Current_patient.lastName = last_name
+        # Current_patient.phoneNumber = phone_number
+        # last_disease = Current_patient.diseases.last()
+        # Current_patient.save()
+        rsp = {'flag': False}
+        return rsp
 
 
 def update_patient_status(data):
     patient_id = data["patientid"]
-    disease_status = data["DiseaseStatus"]
-    patient_status = data["PatientStatus"]
-    current_patient = models.Patient.objects.get(id=patient_id)
-    disease = models.DiseaseStatus.objects.get(DiseaseStatustitle=disease_status, is_System=False)
-    current_patient.diseases.add(disease)
-    status = models.Status.objects.get(Statustitle=patient_status)
-    current_patient.statuses.add(status)
-    return "DONE"
+    disease_status = data["diseaseStatus"]
+    patient_status = data["patientStatus"]
+    if models.Patient.objects.filter(id=patient_id):
+        current_patient = models.Patient.objects.get(id=patient_id)
+        current_disease = models.DiseaseStatus.objects.get(disease_status_title=disease_status, is_System=False)
+        current_status = models.PatientStatus.objects.get(patient_status_title=patient_status)
+        models.Status.objects.create(patient=current_patient, disease_status=current_disease,
+                                     patient_status=current_status)
+        return {'flag': True}
+    else:
+        return {'flag': False}
 
 
 def edit_report(data):
@@ -80,37 +93,73 @@ def edit_report(data):
     lastName = data['lastName']
     nationalCode = data['nationalCode']
     phoneNumber = data['phoneNumber']
-    diseasestatus = data['diseasestatus']
-    patientstatus = data['patientstatus']
+    birthDate = data['birthDate']
+    diseasestatus = data['diseaseStatus']
+    patientstatus = data['patientStatus']
     symptoms = data['symptoms']
-    current_patient = models.Patient.objects.get(id=patientid)
-    if symptoms:
-        models.Patient.objects.get(id=patientid).symptoms.clear()
-        sum = 0
-        for i in symptoms:
-            current_symptom = models.Symptom.objects.get(id=i)
-            sum = sum + int(current_symptom.weight)
-            current_patient.symptoms.add(current_symptom)
-        if sum > 10:
-            current_DiseaseStatus = models.DiseaseStatus.objects.get(DiseaseStatustitle="Ghatei", is_System=True)
-            current_patient.diseases.add(current_DiseaseStatus)
-        elif sum > 5:
-            current_DiseaseStatus = models.DiseaseStatus.objects.get(DiseaseStatustitle="Mashkook", is_System=True)
-            current_patient.diseases.add(current_DiseaseStatus)
-        else:
-            current_DiseaseStatus = models.DiseaseStatus.objects.get(DiseaseStatustitle="Anfoolanza", is_System=True)
-            current_patient.diseases.add(current_DiseaseStatus)
 
-    current_patient.firstName = firstName
-    current_patient.lastName = lastName
-    current_patient.phoneNumber = phoneNumber
-    current_patient.nationalCode = nationalCode
-    current_disease = models.DiseaseStatus.objects.get(DiseaseStatustitle=diseasestatus, is_System=False)
-    current_status = models.Status.objects.get(Statustitle=patientstatus)
-    current_patient.diseases.add(current_disease)
-    current_patient.statuses.add(current_status)
-    current_patient.save()
-
+    if models.Patient.objects.filter(id=patientid):
+        current_patient = models.Patient.objects.get(id=patientid)
+        a = models.Status.objects.filter(patient=current_patient)
+        for i in a:
+            if i.disease_status.is_System:
+                current_disease_system = i.disease_status
+        if symptoms:
+            models.PatientSymptom.objects.filter(patient=current_patient).delete()
+            sum = 0
+            for i in symptoms:
+                current_symptom = models.Symptom.objects.get(symptom_title=i)
+                sum = sum + current_symptom.weight
+                models.PatientSymptom.objects.create(patient=current_patient, symptom=current_symptom)
+            ghatei = models.DiseaseStatus.objects.get(disease_status_title="قطعی کرونا", is_System=True)
+            mashkook = models.DiseaseStatus.objects.get(disease_status_title="مشکوک به کرونا", is_System=True)
+            anfoolanza = models.DiseaseStatus.objects.get(disease_status_title="آنفولانزا", is_System=True)
+            if models.PatientStatus.objects.filter(patient_status_title=patientstatus):
+                current_status = models.PatientStatus.objects.get(patient_status_title=patientstatus)
+                if sum > ghatei.probable:
+                    models.Status.objects.create(patient=current_patient, disease_status=ghatei, patient_status=current_status)
+                    current_disease_system = ghatei
+                elif sum > mashkook.probable:
+                    models.Status.objects.create(patient=current_patient, disease_status=mashkook, patient_status=current_status)
+                    current_disease_system = mashkook
+                else:
+                    models.Status.objects.create(patient=current_patient, disease_status=anfoolanza, patient_status=current_status)
+                    current_disease_system = anfoolanza
+            else:
+                if sum > ghatei.probable:
+                    models.Status.objects.create(patient=current_patient, disease_status=ghatei)
+                    current_disease_system = ghatei
+                elif sum > mashkook.probable:
+                    models.Status.objects.create(patient=current_patient, disease_status=mashkook)
+                    current_disease_system = mashkook
+                else:
+                    models.Status.objects.create(patient=current_patient, disease_status=anfoolanza)
+                    current_disease_system = anfoolanza
+        current_patient.first_name = firstName
+        current_patient.last_name = lastName
+        current_patient.national_code = nationalCode
+        current_patient.phone_number = phoneNumber
+        current_patient.birth_date = birthDate
+        if models.DiseaseStatus.objects.filter(disease_status_title=diseasestatus, is_System=False) \
+                and models.PatientStatus.objects.filter(patient_status_title=patientstatus):
+            current_disease_user = models.DiseaseStatus.objects.get(disease_status_title=diseasestatus, is_System=False)
+            current_status = models.PatientStatus.objects.get(patient_status_title=patientstatus)
+            models.Status.objects.create(patient=current_patient, disease_status=current_disease_user, patient_status=current_status)
+        current_patient.save()
+        rsp = {
+            'user-disease': current_disease_user.disease_status_title,
+            'patientstatus': current_status.patient_status_title,
+            'system_disease': current_disease_system.disease_status_title,
+            'flaf': True
+        }
+        return rsp
+    rsp = {
+        'user-disease': 'null',
+        'patientstatus': 'null',
+        'system_disease': 'null',
+        'flaf': False
+    }
+    return rsp
 
 # ======================
 
@@ -125,58 +174,67 @@ def statusView(request):
 
 
 def createPatient(request):
-    form = forms.PatientForm()
+    form1 = forms.PatientForm()
+    form2 = forms.SymptomForm()
     if request.method == 'POST':
-        form = forms.PatientForm(request.POST)
-        if form.is_valid():
-            myDict = dict(form.data)
-            a = myDict.get('firstName')[0]
-            b = myDict.get('lastName')[0]
-            c = myDict.get('nationalCode')[0]
-            d = myDict.get('phoneNumber')[0]
-            e = myDict.get('symptoms')
+        form1 = forms.PatientForm(request.POST)
+        form2 = forms.SymptomForm(request.POST)
+        if form1.is_valid() and form2.is_valid():
+            myDict = dict(form1.data)
+            a = myDict.get('first_name')[0]
+            b = myDict.get('last_name')[0]
+            c = myDict.get('national_code')[0]
+            d = myDict.get('phone_number')[0]
+            e = myDict.get('birth_date')[0]
+            f = myDict.get('symptom_title')
 
             data = {
                 'firstName': a,
                 'lastName': b,
                 'nationalCode': c,
                 'phoneNumber': d,
-                'symptoms': e
+                'birthData': e,
+                'symptoms': f
             }
             rsp = new_report(data)
-            if rsp.get('illness') == 'Unkown':
-                context = {'form': form}
+            if not rsp.get('flag'):
+                context = {'form1': form1,
+                           'form2': form2}
                 return render(request, 'ErrorpatientForm.html', context)
             context = rsp
             request.session['context'] = context
             return redirect('rsp/')
 
-    context = {'form': form}
+    context = {'form1': form1,
+               'form2': form2}
     return render(request, 'patientForm.html', context)
 
 
 def getResponse(request):
     form1 = forms.DiseaseStatusForm()
-    form2 = forms.StatusForm()
+    form2 = forms.PatientStatusForm()
     context = request.session['context']
     context.update({'form1': form1})
     context.update({'form2': form2})
     if request.method == 'POST':
         form1 = forms.DiseaseStatusForm(request.POST)
-        form2 = forms.StatusForm(request.POST)
+        form2 = forms.PatientStatusForm(request.POST)
         if form1.is_valid() and form2.is_valid():
             myDict = dict(form1.data)
-            DiseaseStatus = myDict.get('DiseaseStatustitle')[0]
-            PatientStatus = myDict.get('Statustitle')[0]
+            DiseaseStatus = myDict.get('disease_status_title')[0]
+            PatientStatus = myDict.get('patient_status_title')[0]
 
             data = {
-                'DiseaseStatus': DiseaseStatus,
-                'PatientStatus': PatientStatus
+                'diseaseStatus': DiseaseStatus,
+                'patientStatus': PatientStatus
             }
-            a = context.get('patientid')
-            data.update({'patientid': a})
+            patientid = context.get('patientid')
+            data.update({'patientid': patientid})
             rsp = update_patient_status(data)
-            print(rsp)
+            if rsp.get('flag'):
+                return redirect('/')
+            else:
+                return render(request, 'rsp.html', context)
 
     return render(request, 'rsp.html', context)
 
@@ -188,39 +246,43 @@ class PatientListView(generic.ListView):
 
 def editReport(request, pk):
     form1 = forms.PatientForm()
-    form2 = forms.DiseaseStatusForm()
-    form3 = forms.StatusForm()
+    form2 = forms.SymptomForm()
+    form3 = forms.DiseaseStatusForm()
+    form4 = forms.PatientStatusForm()
     context = {'form1': form1}
     context.update({'form2': form2})
     context.update({'form3': form3})
+    context.update({'form4': form4})
 
     if request.method == 'POST':
-
         form1 = forms.PatientForm(request.POST)
-        form2 = forms.DiseaseStatusForm(request.POST)
-        form3 = forms.StatusForm(request.POST)
-        if form1.is_valid() and form2.is_valid() and form3.is_valid():
+        form2 = forms.SymptomForm(request.POST)
+        form3 = forms.DiseaseStatusForm(request.POST)
+        form4 = forms.PatientStatusForm(request.POST)
+        if form1.is_valid() and form2.is_valid() and form3.is_valid() and form4.is_valid():
             myDict = dict(form1.data)
-            firstName = myDict.get('firstName')[0]
-            lastName = myDict.get('lastName')[0]
-            nationalCode = myDict.get('nationalCode')[0]
-            phoneNumber = myDict.get('phoneNumber')[0]
-            symptoms = myDict.get('symptoms')
-            DiseaseStatus = myDict.get('DiseaseStatustitle')[0]
-            PatientStatus = myDict.get('Statustitle')[0]
+            firstName = myDict.get('first_name')[0]
+            lastName = myDict.get('last_name')[0]
+            nationalCode = myDict.get('national_code')[0]
+            phoneNumber = myDict.get('phone_number')[0]
+            birthDate = myDict.get('birth_date')[0]
+            symptoms = myDict.get('symptom_title')
+            DiseaseStatus = myDict.get('disease_status_title')[0]
+            PatientStatus = myDict.get('patient_status_title')[0]
             data = {
                 'patientid': pk,
                 'firstName': firstName,
                 'lastName': lastName,
                 'nationalCode': nationalCode,
                 'phoneNumber': phoneNumber,
+                'birthDate': birthDate,
                 'symptoms': symptoms,
-                'diseasestatus': DiseaseStatus,
-                'patientstatus': PatientStatus
+                'diseaseStatus': DiseaseStatus,
+                'patientStatus': PatientStatus
             }
             edit_report(data)
-            a = '/patient/patient-info/' + str(pk)
-            return redirect(a)
+            new_url = '/patient/patient-info/' + str(pk)
+            return redirect(new_url)
 
     return render(request, 'editReport.html', context)
 
@@ -229,9 +291,9 @@ class PatientInfoView(generic.DetailView):
     model = models.Patient
     template_name = 'patient-info.html'
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['lastpatientstatus'] = models.Patient.objects.get(id=4).statuses.last()
-        context['lastdiseasestatus'] = models.Patient.objects.get(id=4).diseases.last()
+        # a = models.Status.objects.filter(patient_id=pk)
+        # context['lastpatientstatus'] = models.Patient.objects.get(id=4).statuses.last()
+        # context['lastdiseasestatus'] = models.Patient.objects.get(id=4).diseases.last()
         return context

@@ -9,6 +9,6 @@ urlpatterns = [
     path('patient/rsp/', views.getResponse, name="patientReportResponse"),
     path('all-patients/', views.PatientListView.as_view(), name='patients'),
     url(r'^patient-info/(?P<pk>\d+)$', views.PatientInfoView.as_view(), name='patient-info'),
-    url(r'^edit-report/(?P<pk>\d+)$', views.editReport, name="editReport"),
+    url(r'^all-patients/editReport/(?P<pk>\d+)$', views.editReport, name="edit-report"),
 
 ]

@@ -1,14 +1,10 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Patient: {{ patient.firstName }}   {{ patient.lastName }}</h1>
+  <h1>Patient: {{ patient.first_name }}   {{ patient.last_name }}</h1>
 
-  <p><strong>Phone Number:</strong> {{ patient.phoneNumber }}</p> <!-- author detail link not yet defined -->
-  <p><strong>National Code:</strong> {{ patient.nationalCode }}</p>
-  <p><strong>Patient Symptoms:</strong> {% for symptoms in patient.symptoms.all %} {{ symptoms }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-  <p><strong>Patient Status:</strong> {% for status in patient.statuses.all %} {{ status }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-    <p><strong>last Patient Status:</strong> {{ lastpatientstatus }}
-  <p><strong>Disease Status:</strong> {% for disease in patient.diseases.all %} {{ disease }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-    <p><strong>last Disease Status:</strong> {{ lastdiseasestatus }}
+  <p><strong>Phone Number:</strong> {{ patient.phone_number }}</p>
+  <p><strong>National Code:</strong> {{ patient.national_code }}</p>
+    <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
 
 {% endblock %}

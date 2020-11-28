@@ -8,12 +8,12 @@
 
       {% for patient in patient_list %}
       <li>
-         <a href="{{ patient.get_absolute_url }}">{{ patient.firstName }} {{ patient.lastName }}</a> (nationalcode = {{ patient.nationalCode }} , phonenumber = {{ patient.phoneNumber }})
+         <a href="{{ patient.get_absolute_url }}">{{ patient.first_name }} {{ patient.last_name }}</a> (nationalcode = {{ patient.national_code }} , phonenumber = {{ patient.phone_number }})
       </li>
       {% endfor %}
 
     </ul>
     {% else %}
-      <p>There are no books in the library.</p>
+      <p>There are no Patients.</p>
     {% endif %}
 {% endblock %}

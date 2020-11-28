@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'postgresTest.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'CoronaS',
+        'NAME': 'CoronaST3',
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': 'localhost',
