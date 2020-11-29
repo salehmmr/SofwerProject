@@ -1,4 +1,4 @@
-from django.forms import ModelForm, forms
+from django.forms import ModelForm
 from . import models
 
 
@@ -24,3 +24,9 @@ class PatientStatusForm(ModelForm):
     class Meta:
         model = models.PatientStatus
         fields = ['patient_status_title']
+
+
+class ConnectionForm(ModelForm):
+    class Meta:
+        model = models.Connections
+        fields = ['phone_number', 'email']

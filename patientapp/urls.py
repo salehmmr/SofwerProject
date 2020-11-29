@@ -8,7 +8,9 @@ urlpatterns = [
     path('patient/', views.createPatient, name="patient"),
     path('patient/rsp/', views.getResponse, name="patientReportResponse"),
     path('all-patients/', views.PatientListView.as_view(), name='patients'),
+    path('all-patients-connection/', views.PatientListConnectionView.as_view(), name='patients-connection'),
+    url(r'^connection-patient/(?P<pk>\d+)$', views.newConnection, name="connection-patient"),
+    url(r'^edit-report/(?P<pk>\d+)$', views.editReport, name="edit-report"),
     url(r'^patient-info/(?P<pk>\d+)$', views.PatientInfoView.as_view(), name='patient-info'),
-    url(r'^all-patients/editReport/(?P<pk>\d+)$', views.editReport, name="edit-report"),
 
 ]

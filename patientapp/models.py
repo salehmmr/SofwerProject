@@ -17,6 +17,12 @@ class Patient(models.Model):
         """
         return reverse('edit-report', args=[str(self.id)])
 
+    def get_absolute_url_connection(self):
+        """
+        Returns the url to access a particular book instance.
+        """
+        return reverse('connection-patient', args=[str(self.id)])
+
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 

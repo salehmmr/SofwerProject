@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Patient List</h1>
+
+    {% if patient_list %}
+    <ul>
+
+      {% for patient in patient_list %}
+      <li>
+         <a href="{{ patient.get_absolute_url_connection }}">{{ patient.first_name }} {{ patient.last_name }}</a> (nationalcode = {{ patient.national_code }} , phonenumber = {{ patient.phone_number }})
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There are no Patients.</p>
+    {% endif %}
+{% endblock %}

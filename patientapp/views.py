@@ -2,6 +2,16 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from . import forms
 from . import models
+from django.core.mail import send_mail
+
+
+def send_email(email, data):
+    send_mail('django test title',
+              'this email is sent by Corona_Project.\n You should take care of yourself in this situation.\n\n '
+              'Thanks\nlast disease:'+data,
+              'sofwareengineering96@gmail.com',
+              [email],
+              fail_silently=False)
 
 
 def new_report(data):
@@ -117,13 +127,20 @@ def edit_report(data):
             if models.PatientStatus.objects.filter(patient_status_title=patientstatus):
                 current_status = models.PatientStatus.objects.get(patient_status_title=patientstatus)
                 if sum > ghatei.probable:
-                    models.Status.objects.create(patient=current_patient, disease_status=ghatei, patient_status=current_status)
+                    models.Status.objects.create(patient=current_patient, disease_status=ghatei,
+                                                 patient_status=current_status)
                     current_disease_system = ghatei
+                    for i in models.Connections.objects.filter(patient=current_patient):
+                        send_email(i.email, current_disease_system.disease_status_title)
                 elif sum > mashkook.probable:
-                    models.Status.objects.create(patient=current_patient, disease_status=mashkook, patient_status=current_status)
+                    models.Status.objects.create(patient=current_patient, disease_status=mashkook,
+                                                 patient_status=current_status)
                     current_disease_system = mashkook
+                    for i in models.Connections.objects.filter(patient=current_patient):
+                        send_email(i.email, current_disease_system.disease_status_title)
                 else:
-                    models.Status.objects.create(patient=current_patient, disease_status=anfoolanza, patient_status=current_status)
+                    models.Status.objects.create(patient=current_patient, disease_status=anfoolanza,
+                                                 patient_status=current_status)
                     current_disease_system = anfoolanza
             else:
                 if sum > ghatei.probable:
@@ -144,7 +161,8 @@ def edit_report(data):
                 and models.PatientStatus.objects.filter(patient_status_title=patientstatus):
             current_disease_user = models.DiseaseStatus.objects.get(disease_status_title=diseasestatus, is_System=False)
             current_status = models.PatientStatus.objects.get(patient_status_title=patientstatus)
-            models.Status.objects.create(patient=current_patient, disease_status=current_disease_user, patient_status=current_status)
+            models.Status.objects.create(patient=current_patient, disease_status=current_disease_user,
+                                         patient_status=current_status)
         current_patient.save()
         rsp = {
             'user-disease': current_disease_user.disease_status_title,
@@ -160,6 +178,26 @@ def edit_report(data):
         'flaf': False
     }
     return rsp
+
+
+def make_connection(data):
+    patientid = data['patientid']
+    phonenumber = data['phoneNumber']
+    email = data['email']
+    if models.Patient.objects.filter(id=patientid):
+        current_patient = models.Patient.objects.get(id=patientid)
+        models.Connections.objects.create(patient=current_patient, phone_number=phonenumber, email=email)
+        last_disease = ''
+        for i in models.Status.objects.filter(patient=current_patient):
+            last_disease = i.disease_status.disease_status_title
+        if last_disease == "مشکوک به کرونا":
+            send_email(email, last_disease)
+        elif last_disease == "قطعی کرونا":
+            send_email(email, last_disease)
+        return {'flag': True}
+    else:
+        return {'flag': False}
+
 
 # ======================
 
@@ -244,6 +282,11 @@ class PatientListView(generic.ListView):
     template_name = 'patient_list.html'
 
 
+class PatientListConnectionView(generic.ListView):
+    model = models.Patient
+    template_name = 'patient_list-connection.html'
+
+
 def editReport(request, pk):
     form1 = forms.PatientForm()
     form2 = forms.SymptomForm()
@@ -297,3 +340,29 @@ class PatientInfoView(generic.DetailView):
         # context['lastpatientstatus'] = models.Patient.objects.get(id=4).statuses.last()
         # context['lastdiseasestatus'] = models.Patient.objects.get(id=4).diseases.last()
         return context
+
+
+def newConnection(request, pk):
+    form1 = forms.ConnectionForm()
+    context = {'form1': form1}
+    if request.method == 'POST':
+        form1 = forms.ConnectionForm(request.POST)
+        if form1.is_valid():
+            myDict = dict(form1.data)
+            phoneNumber = myDict.get('phone_number')[0]
+            email = myDict.get('email')[0]
+            data = {
+                'patientid': pk,
+                'phoneNumber': phoneNumber,
+                'email': email,
+            }
+            rsp = make_connection(data)
+            if rsp.get('flag'):
+                return render(request, 'new_connection_Done.html', context)
+            else:
+                return render(request, 'Errornew_connection.html', context)
+    return render(request, 'new_connection.html', context)
+
+
+
+
