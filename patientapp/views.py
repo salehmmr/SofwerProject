@@ -168,14 +168,14 @@ def edit_report(data):
             'user-disease': current_disease_user.disease_status_title,
             'patientstatus': current_status.patient_status_title,
             'system_disease': current_disease_system.disease_status_title,
-            'flaf': True
+            'flag': True
         }
         return rsp
     rsp = {
         'user-disease': 'null',
         'patientstatus': 'null',
         'system_disease': 'null',
-        'flaf': False
+        'flag': False
     }
     return rsp
 
@@ -336,15 +336,24 @@ class PatientInfoView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # a = models.Status.objects.filter(patient_id=pk)
-        # context['lastpatientstatus'] = models.Patient.objects.get(id=4).statuses.last()
-        # context['lastdiseasestatus'] = models.Patient.objects.get(id=4).diseases.last()
+        last_patient_status = ''
+        last_disease_status = ''
+        print(models.Status.objects.filter(patient_id=self.kwargs['pk']))
+        for i in models.Status.objects.filter(patient_id=self.kwargs['pk']):
+            print(i.patient_status)
+            last_patient_status = i.patient_status
+            if not i.disease_status.is_System:
+                last_disease_status = i.disease_status.disease_status_title
+
+        context['lastpatientstatus'] = last_patient_status
+        context['lastdiseasestatus'] = last_disease_status
         return context
 
 
 def newConnection(request, pk):
     form1 = forms.ConnectionForm()
     context = {'form1': form1}
+    context.update({'connection': models.Connections.objects.filter(patient_id=pk)})
     if request.method == 'POST':
         form1 = forms.ConnectionForm(request.POST)
         if form1.is_valid():

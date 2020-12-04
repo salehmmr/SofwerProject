@@ -12,6 +12,12 @@
             <button type="submit" class="btn btn-primary col-lg-2">Submit Form</button>
 			</form>
 		</div>
+        {% for i in connection %}
+            <tr>
+                <td>email: {{i.email}}  .........     phone number: {{ i.phone_number }}</td>
+                <br>
+            </tr>
+        {% endfor %}
     </div>
 </div>
 
