@@ -1,7 +1,8 @@
 {% extends 'home.html' %}
 
 {% block content %}
-
+Current Connection email: {{ email }}<br>
+Current Connection phone number: {{ phoneNumber }}
 
 <div class="row">
     <div class = "container">
@@ -12,12 +13,6 @@
             <button type="submit" class="btn btn-primary col-lg-2">Submit Form</button>
 			</form>
 		</div>
-        {% for i in connection %}
-            <tr>
-                <td><a href="edit-connection/{{ pid }}/{{ i.email }}">email: {{i.email}}  .........     phone number: {{ i.phone_number }}</a></td>
-                <br>
-            </tr>
-        {% endfor %}
     </div>
 </div>
 

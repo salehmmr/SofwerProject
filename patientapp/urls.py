@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^connection-patient/(?P<pk>\d+)$', views.newConnection, name="connection-patient"),
     url(r'^edit-report/(?P<pk>\d+)$', views.editReport, name="edit-report"),
     url(r'^patient-info/(?P<pk>\d+)$', views.PatientInfoView.as_view(), name='patient-info'),
-
+    url(r'edit-connection/(?P<pk>\d+)/(?P<email>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$', views.editConnection, name="edit-connection"),
+    # url(r'^edit-connection/(?P<pk>\d+)$', views.editReport, name="edit-report"),
 ]

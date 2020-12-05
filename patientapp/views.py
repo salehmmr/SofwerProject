@@ -199,6 +199,22 @@ def make_connection(data):
         return {'flag': False}
 
 
+def update_connection(data):
+    patientid = data['patientid']
+    new_phonenumber = data['new_phoneNumber']
+    old_phonenumber = data['old_phoneNumber']
+    new_email = data['new_email']
+    old_email = data['old_email']
+    current_patient = models.Patient.objects.get(id=patientid)
+    current_connection = models.Connections.objects.get(patient=current_patient, email=old_email, phone_number=old_phonenumber)
+    for i in models.Connections.objects.filter(patient=current_patient, email=old_email, phone_number=old_phonenumber):
+        current_connection = i
+    current_connection.email = new_email
+    current_connection.phone_number = new_phonenumber
+    current_connection.save()
+    return True
+
+
 # ======================
 
 def homeView(request):
@@ -354,6 +370,8 @@ def newConnection(request, pk):
     form1 = forms.ConnectionForm()
     context = {'form1': form1}
     context.update({'connection': models.Connections.objects.filter(patient_id=pk)})
+    context.update({'pid': pk})
+    print(context)
     if request.method == 'POST':
         form1 = forms.ConnectionForm(request.POST)
         if form1.is_valid():
@@ -371,6 +389,35 @@ def newConnection(request, pk):
             else:
                 return render(request, 'Errornew_connection.html', context)
     return render(request, 'new_connection.html', context)
+
+
+def editConnection(request, pk, email):
+    current_patient = models.Patient.objects.get(id= pk)
+    phoneNumber = ''
+    for i in models.Connections.objects.filter(patient=current_patient, email=email):
+        phoneNumber = i.phone_number
+    form1 = forms.ConnectionForm()
+    context = {'form1': form1}
+    if request.method == 'POST':
+        form1 = forms.ConnectionForm(request.POST)
+        if form1.is_valid():
+            myDict = dict(form1.data)
+            new_phoneNumber = myDict.get('phone_number')[0]
+            new_email = myDict.get('email')[0]
+            data = {
+                'patientid': pk,
+                'new_phoneNumber': new_phoneNumber,
+                'new_email': new_email,
+                'old_email': email,
+                'old_phoneNumber': phoneNumber
+            }
+            rsp = update_connection(data)
+            new_url = '/patient/connection-patient/' + str(pk)
+            return redirect(new_url)
+    context.update({'email': email})
+    context.update({'phoneNumber': phoneNumber})
+    return render(request, 'edit-connection.html', context)
+
 
 
 
